@@ -13,6 +13,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user_role")
 public class UserRole {
 
     @EmbeddedId
@@ -22,7 +23,6 @@ public class UserRole {
     @Embeddable
     @AllArgsConstructor
     @NoArgsConstructor
-    @Table(name = "user_role")
     public static class UserRoleId implements Serializable {
         private Long userId;
         private Long roleId;
