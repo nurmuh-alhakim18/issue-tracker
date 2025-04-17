@@ -13,6 +13,14 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<BaseResponse<Void>> handleRuntimeException(RuntimeException e) {
+        Map<String, String> errors = Map.of("general", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(BaseResponse.fail("Something happened", errors));
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<BaseResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException e) {
         Map<String, String> errors = Map.of("general", e.getMessage());
