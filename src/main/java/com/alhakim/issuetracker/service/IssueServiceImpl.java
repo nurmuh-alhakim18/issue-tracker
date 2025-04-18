@@ -76,8 +76,9 @@ public class IssueServiceImpl implements IssueService {
                     .map(tagIdToName::get)
                     .toList();
 
-            Long userId = Optional.ofNullable(userMap.get(issue.getCreatedBy())).map(User::getId).orElse(null);
-            String username = Optional.ofNullable(userMap.get(issue.getCreatedBy())).map(User::getUsername).orElse("Unknown");
+            User user = userMap.get(issue.getCreatedBy());
+            Long userId = user != null ? user.getId() : null;
+            String username = user != null ? user.getUsername() : "Unknown";
             CreatedBy createdBy = IssueResponse.CreatedBy.builder().id(userId).username(username).build();
 
             return IssueResponse.create(issue, tagNames, createdBy);
