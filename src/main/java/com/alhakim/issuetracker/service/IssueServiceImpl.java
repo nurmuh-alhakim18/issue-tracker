@@ -4,6 +4,7 @@ import com.alhakim.issuetracker.dto.IssueRequest;
 import com.alhakim.issuetracker.dto.IssueResponse;
 import com.alhakim.issuetracker.dto.IssueResponse.CreatedBy;
 import com.alhakim.issuetracker.dto.IssueUpdateRequest;
+import com.alhakim.issuetracker.dto.PaginatedResponse;
 import com.alhakim.issuetracker.entity.Issue;
 import com.alhakim.issuetracker.entity.IssueTag;
 import com.alhakim.issuetracker.entity.IssueTag.IssueTagId;
@@ -16,6 +17,9 @@ import com.alhakim.issuetracker.repository.TagRepository;
 import com.alhakim.issuetracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -48,10 +52,10 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public List<IssueResponse> getIssues() {
-        List<Issue> issues = issueRepository.findAll();
-        Set<Long> issuesIds = issues.stream().map(Issue::getId).collect(Collectors.toSet());
-        Set<Long> userIds = issues.stream().map(Issue::getCreatedBy).collect(Collectors.toSet());
+    public PaginatedResponse<IssueResponse> getIssues(Pageable pageable) {
+        Page<Issue> issuesPage = issueRepository.findAll(pageable);
+        Set<Long> issuesIds = issuesPage.getContent().stream().map(Issue::getId).collect(Collectors.toSet());
+        Set<Long> userIds = issuesPage.getContent().stream().map(Issue::getCreatedBy).collect(Collectors.toSet());
 
         List<IssueTag> allIssueTags = issueTagRepository.findByIdIssueIdIn(issuesIds);
         Map<Long, List<Long>> issueIdToTagIds = allIssueTags.stream()
@@ -67,7 +71,7 @@ public class IssueServiceImpl implements IssueService {
         Map<Long, User> userMap = userRepository.findByIdIn(userIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
-        return issues.stream().map(issue -> {
+        List<IssueResponse> issues = issuesPage.getContent().stream().map(issue -> {
             List<String> tagNames = issueIdToTagIds.getOrDefault(issue.getId(), List.of()).stream()
                     .map(tagIdToName::get)
                     .toList();
@@ -78,6 +82,9 @@ public class IssueServiceImpl implements IssueService {
 
             return IssueResponse.create(issue, tagNames, createdBy);
         }).toList();
+
+        Page<IssueResponse> issueResponsePage = new PageImpl<>(issues, pageable, issuesPage.getTotalElements());
+        return PaginatedResponse.create(issueResponsePage);
     }
 
     @Override

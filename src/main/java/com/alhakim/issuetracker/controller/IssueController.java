@@ -1,13 +1,13 @@
 package com.alhakim.issuetracker.controller;
 
-import com.alhakim.issuetracker.dto.BaseResponse;
-import com.alhakim.issuetracker.dto.IssueRequest;
-import com.alhakim.issuetracker.dto.IssueResponse;
-import com.alhakim.issuetracker.dto.IssueUpdateRequest;
+import com.alhakim.issuetracker.dto.*;
 import com.alhakim.issuetracker.service.CurrentUserService;
 import com.alhakim.issuetracker.service.IssueService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +31,18 @@ public class IssueController {
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<IssueResponse>>> getIssues() {
-        List<IssueResponse> issueResponses = issueService.getIssues();
+    public ResponseEntity<BaseResponse<PaginatedResponse<IssueResponse>>> getIssues(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "id") String orderBy,
+            @RequestParam(defaultValue = "asc") String direction
+
+    ) {
+        int pageIndex = Math.max(0, page - 1);
+        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(orderBy).descending() : Sort.by(orderBy);
+        Pageable pageable = PageRequest.of(pageIndex, size, sort);
+
+        PaginatedResponse<IssueResponse> issueResponses = issueService.getIssues(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success("Get issue list success", issueResponses));
     }
 
