@@ -17,6 +17,7 @@ import com.alhakim.issuetracker.repository.TagRepository;
 import com.alhakim.issuetracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @Cacheable(value = "issue-page", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public PaginatedResponse<IssueResponse> getIssues(Pageable pageable) {
         Page<Issue> issuesPage = issueRepository.findAll(pageable);
         Set<Long> issuesIds = issuesPage.getContent().stream().map(Issue::getId).collect(Collectors.toSet());
@@ -89,6 +91,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @Cacheable(value = "issue", key = "#issueId")
     public IssueResponse getIssue(Long issueId) {
         Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
 
