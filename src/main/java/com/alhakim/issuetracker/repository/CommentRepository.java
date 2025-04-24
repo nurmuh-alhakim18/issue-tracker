@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByIssueId(Long issueId, Pageable pageable);
+
+    void deleteByIssueId(Long issueId);
 }
