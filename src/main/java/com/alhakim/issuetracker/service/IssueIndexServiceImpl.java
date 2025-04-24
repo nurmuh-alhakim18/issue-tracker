@@ -3,7 +3,6 @@ package com.alhakim.issuetracker.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
 import com.alhakim.issuetracker.dto.IssueIndex;
 import com.alhakim.issuetracker.entity.Issue;
