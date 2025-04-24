@@ -11,12 +11,11 @@ import com.alhakim.issuetracker.entity.IssueTag.IssueTagId;
 import com.alhakim.issuetracker.entity.Tag;
 import com.alhakim.issuetracker.entity.User;
 import com.alhakim.issuetracker.exception.ResourceNotFoundException;
-import com.alhakim.issuetracker.repository.IssueRepository;
-import com.alhakim.issuetracker.repository.IssueTagRepository;
-import com.alhakim.issuetracker.repository.TagRepository;
-import com.alhakim.issuetracker.repository.UserRepository;
+import com.alhakim.issuetracker.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,9 +34,12 @@ public class IssueServiceImpl implements IssueService {
     private final TagRepository tagRepository;
     private final IssueTagRepository issueTagRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final IssueIndexService issueIndexService;
 
     @Override
     @Transactional
+    @CachePut(value = "issue", key = "#issueId")
     public void createIssue(IssueRequest issueRequest, Long userId) {
         Issue issue = Issue.builder()
                 .title(issueRequest.getTitle())
@@ -50,6 +52,7 @@ public class IssueServiceImpl implements IssueService {
         issueRepository.save(issue);
 
         processTags(issue, issueRequest.getTags());
+        issueIndexService.indexIssue(issue);
     }
 
     @Override
@@ -110,6 +113,8 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "issue", key = "#issueId")
+    @CachePut(value = "issue", key = "#issueId")
     public void updateIssue(Long issueId, IssueUpdateRequest issueUpdateRequest) {
         Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
 
@@ -129,11 +134,15 @@ public class IssueServiceImpl implements IssueService {
             issue.setPriority(issueUpdateRequest.getPriority());
         }
 
+        issueRepository.save(issue);
+
         if (issueUpdateRequest.getTags() != null) {
             issueTagRepository.deleteByIdIssueId(issueId);
 
             processTags(issue, issueUpdateRequest.getTags());
         }
+
+        issueIndexService.indexIssue(issue);
     }
 
     private void processTags(Issue issue, List<String> tagsInput) {
@@ -159,10 +168,13 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "issue", key = "#issueId")
     public void deleteIssue(Long issueId) {
         Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
 
         issueTagRepository.deleteByIdIssueId(issueId);
+        commentRepository.deleteByIssueId(issueId);
         issueRepository.delete(issue);
+        issueIndexService.deleteIssue(issue);
     }
 }

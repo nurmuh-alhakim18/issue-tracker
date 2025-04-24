@@ -22,7 +22,21 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.28
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
 
 volumes:
   postgres_data:
   redis_data:
+  elastic_data:
