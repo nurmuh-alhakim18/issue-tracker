@@ -39,7 +39,6 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
-    @CachePut(value = "issue", key = "#issueId")
     public void createIssue(IssueRequest issueRequest, Long userId) {
         Issue issue = Issue.builder()
                 .title(issueRequest.getTitle())
