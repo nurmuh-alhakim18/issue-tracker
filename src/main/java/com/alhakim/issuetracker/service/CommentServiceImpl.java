@@ -12,6 +12,7 @@ import com.alhakim.issuetracker.repository.CommentRepository;
 import com.alhakim.issuetracker.repository.IssueRepository;
 import com.alhakim.issuetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,8 +47,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Cacheable(value = "comment-page", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public PaginatedResponse<CommentResponse> getComments(Long id, Pageable pageable) {
+        issueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
         Page<Comment> comments = commentRepository.findByIssueId(id, pageable);
         Set<Long> userIds = comments.stream().map(Comment::getUserId).collect(Collectors.toSet());
         Map<Long, User> userMap = userRepository.findByIdIn(userIds).stream()

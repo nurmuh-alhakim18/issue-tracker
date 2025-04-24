@@ -55,7 +55,6 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    @Cacheable(value = "issue-page", key = "{#pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public PaginatedResponse<IssueResponse> getIssues(Pageable pageable) {
         Page<Issue> issuesPage = issueRepository.findAll(pageable);
         Set<Long> issuesIds = issuesPage.getContent().stream().map(Issue::getId).collect(Collectors.toSet());
