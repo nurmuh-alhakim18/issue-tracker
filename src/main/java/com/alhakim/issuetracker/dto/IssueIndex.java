@@ -9,6 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Builder
@@ -23,8 +26,8 @@ public class IssueIndex {
     private Priority priority;
     private List<String> tags;
     private CreatedBy createdBy;
-//    private LocalDateTime createdAt;
-//    private LocalDateTime updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
 
     @Data
     @Builder
@@ -36,6 +39,9 @@ public class IssueIndex {
     }
 
     public static IssueIndex create(Issue issue, List<String> tagNames, CreatedBy createdBy) {
+        Date createdAt = convertLocalDateTimeToDate(issue.getCreatedAt());
+        Date updatedAt = convertLocalDateTimeToDate(issue.getUpdatedAt());
+
         return IssueIndex.builder()
                 .id(issue.getId().toString())
                 .title(issue.getTitle())
@@ -44,8 +50,14 @@ public class IssueIndex {
                 .priority(issue.getPriority())
                 .tags(tagNames)
                 .createdBy(createdBy)
-//                .createdAt(issue.getCreatedAt())
-//                .updatedAt(issue.getUpdatedAt())
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
+    }
+
+    private static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return Date.from(zonedDateTime.toInstant());
     }
 }
