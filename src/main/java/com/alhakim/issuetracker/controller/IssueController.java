@@ -3,6 +3,7 @@ package com.alhakim.issuetracker.controller;
 import com.alhakim.issuetracker.dto.*;
 import com.alhakim.issuetracker.service.CurrentUserService;
 import com.alhakim.issuetracker.service.IssueService;
+import com.alhakim.issuetracker.service.SearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,6 +22,7 @@ public class IssueController {
 
     private final CurrentUserService currentUserService;
     private final IssueService issueService;
+    private final SearchService searchService;
 
     @PostMapping
     public ResponseEntity<BaseResponse<Void>> createIssue(@RequestBody @Valid IssueRequest request) {
@@ -44,6 +45,12 @@ public class IssueController {
 
         PaginatedResponse<IssueResponse> issueResponses = issueService.getIssues(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success("Get issue list success", issueResponses));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<BaseResponse<PaginatedResponse<IssueResponse>>> searchIssues(@RequestBody IssueSearchRequest request) {
+        PaginatedResponse<IssueResponse> issueResponse = searchService.search(request);
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success("Search issues success", issueResponse));
     }
 
     @GetMapping("/{id}")

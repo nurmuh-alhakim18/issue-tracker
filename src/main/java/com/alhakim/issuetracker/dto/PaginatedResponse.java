@@ -33,4 +33,27 @@ public class PaginatedResponse<T> {
                 .last(page.isLast())
                 .build();
     }
+
+    public static <T> PaginatedResponse<T> create(List<T> data , PageInfo pageInfo) {
+        return PaginatedResponse.<T>builder()
+                .data(data)
+                .pageNo(pageInfo.getPageNo())
+                .pageSize(pageInfo.getPageSize())
+                .totalPages(pageInfo.getTotalPages())
+                .totalElements(pageInfo.getTotalElements())
+                .last(pageInfo.isLast())
+                .build();
+    }
+
+    @Builder
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class PageInfo {
+        private int pageNo;
+        private int pageSize;
+        private long totalElements;
+        private long totalPages;
+        private boolean last;
+    }
 }
