@@ -36,6 +36,7 @@ public class IssueServiceImpl implements IssueService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final IssueIndexService issueIndexService;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     @Transactional
@@ -51,7 +52,13 @@ public class IssueServiceImpl implements IssueService {
         issueRepository.save(issue);
 
         processTags(issue, issueRequest.getTags());
-        issueIndexService.indexIssue(issue);
+//        issueIndexService.indexIssue(issue);
+        kafkaProducerService.publishIssueIndex(createKafkaMessage(issue, "INDEX"));
+    }
+
+    private String createKafkaMessage(Issue issue, String action) {
+        String issueId = issue.getId().toString();
+        return action + "," + issueId;
     }
 
     @Override
@@ -140,7 +147,8 @@ public class IssueServiceImpl implements IssueService {
             processTags(issue, issueUpdateRequest.getTags());
         }
 
-        issueIndexService.indexIssue(issue);
+//        issueIndexService.indexIssue(issue);
+        kafkaProducerService.publishIssueIndex(createKafkaMessage(issue, "INDEX"));
     }
 
     private void processTags(Issue issue, List<String> tagsInput) {
@@ -172,7 +180,8 @@ public class IssueServiceImpl implements IssueService {
 
         issueTagRepository.deleteByIdIssueId(issueId);
         commentRepository.deleteByIssueId(issueId);
+        kafkaProducerService.publishIssueIndex(createKafkaMessage(issue, "DELETE"));
+//        issueIndexService.deleteIssue(issue);
         issueRepository.delete(issue);
-        issueIndexService.deleteIssue(issue);
     }
 }
