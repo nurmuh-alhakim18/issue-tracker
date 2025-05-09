@@ -1,7 +1,6 @@
 package com.alhakim.issuetracker.middleware;
 
 import com.alhakim.issuetracker.service.JwtService;
-import com.alhakim.issuetracker.service.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
