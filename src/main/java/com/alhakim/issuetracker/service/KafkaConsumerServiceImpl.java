@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -29,9 +30,23 @@ public class KafkaConsumerServiceImpl implements KafkaConsumerService {
             return;
         }
 
-        Issue issue = issueRepository.findById(id).orElse(null);
+        Issue issue = null;
+        for (int attempt = 0; attempt < 3; attempt++) {
+            issue = issueRepository.findById(id).orElse(null);
+            if (issue != null) {
+                break;
+            }
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+
         if (issue == null) {
-            log.info("Issue not found: {}", id);
+            log.info("Issue not found after 3 attempts: {}", id);
             return;
         }
 
