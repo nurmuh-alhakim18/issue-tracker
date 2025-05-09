@@ -25,21 +25,21 @@ public class KafkaConsumerServiceImpl implements KafkaConsumerService {
         Long id = Long.parseLong(parts[1]);
 
         if (!List.of("INDEX", "DELETE").contains(action)) {
-            log.info("Issue index action invalid: " + action);
+            log.info("Issue index action invalid: {}", action);
             return;
         }
 
         Issue issue = issueRepository.findById(id).orElse(null);
         if (issue == null) {
-            log.info("Issue not found: " + id);
+            log.info("Issue not found: {}", id);
             return;
         }
 
         if (action.equals("INDEX")) {
-            log.info("Issue indexed: " + issue);
+            log.info("Issue indexed: {}", issue);
             issueIndexService.indexIssue(issue);
         } else if (action.equals("DELETE")) {
-            log.info("Issue deleted: " + issue);
+            log.info("Issue deleted: {}", issue);
             issueIndexService.deleteIssue(issue);
         }
     }
