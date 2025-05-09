@@ -6,6 +6,7 @@ import com.alhakim.issuetracker.dto.CommentResponse;
 import com.alhakim.issuetracker.dto.PaginatedResponse;
 import com.alhakim.issuetracker.service.CommentService;
 import com.alhakim.issuetracker.service.CurrentUserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
+    @SecurityRequirement(name = "Bearer")
     public ResponseEntity<BaseResponse<Void>> createComment(@PathVariable Long id, @RequestBody CommentRequest commentRequest) {
         Long userId = currentUserService.getCurrentUserId();
         commentService.createComment(commentRequest, id, userId);

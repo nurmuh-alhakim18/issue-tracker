@@ -4,6 +4,7 @@ import com.alhakim.issuetracker.dto.*;
 import com.alhakim.issuetracker.service.CurrentUserService;
 import com.alhakim.issuetracker.service.IssueService;
 import com.alhakim.issuetracker.service.SearchService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ public class IssueController {
     private final SearchService searchService;
 
     @PostMapping
+    @SecurityRequirement(name = "Bearer")
     public ResponseEntity<BaseResponse<Void>> createIssue(@RequestBody @Valid IssueRequest request) {
         Long userId = currentUserService.getCurrentUserId();
         issueService.createIssue(request, userId);
@@ -47,7 +49,7 @@ public class IssueController {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success("Get issue list success", issueResponses));
     }
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     public ResponseEntity<BaseResponse<PaginatedResponse<IssueResponse>>> searchIssues(@RequestBody IssueSearchRequest request) {
         PaginatedResponse<IssueResponse> issueResponse = searchService.search(request);
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success("Search issues success", issueResponse));
@@ -60,6 +62,7 @@ public class IssueController {
     }
 
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
     public ResponseEntity<BaseResponse<Void>> updateIssue(@PathVariable Long id, @RequestBody @Valid IssueUpdateRequest request) {
         Long userId = currentUserService.getCurrentUserId();
         IssueResponse issue = issueService.getIssue(id);
@@ -73,6 +76,7 @@ public class IssueController {
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
     public ResponseEntity<BaseResponse<Void>> deleteIssue(@PathVariable Long id) {
         Long userId = currentUserService.getCurrentUserId();
         IssueResponse issue = issueService.getIssue(id);

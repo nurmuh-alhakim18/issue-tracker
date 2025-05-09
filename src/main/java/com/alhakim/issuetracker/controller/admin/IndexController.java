@@ -2,6 +2,7 @@ package com.alhakim.issuetracker.controller.admin;
 
 import com.alhakim.issuetracker.dto.BaseResponse;
 import com.alhakim.issuetracker.service.IssueIndexService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/admin/index")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer")
 public class IndexController {
 
     private final IssueIndexService issueIndexService;
